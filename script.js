@@ -61,6 +61,7 @@ function restoreTimer() {
 
 // --- RENDER INTRO ---
 function renderIntro() {
+  if (localStorage.getItem('varkamp_current')) return;
   localStorage.removeItem('varkamp_current');
   localStorage.removeItem('varkamp_timer');
   clearInterval(timerId);
@@ -233,10 +234,7 @@ function finish() {
   };
   card.appendChild(shareBtn);
 
-  const restartBtn = document.createElement('button');
-  restartBtn.textContent = 'Starta om';
-  restartBtn.onclick = () => renderIntro();
-  card.appendChild(restartBtn);
+  // Starta om-knapp borttagen – spelet kan inte återstartas.
 
   app.innerHTML = '';
   
