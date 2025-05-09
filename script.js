@@ -17,6 +17,7 @@ const aFinish  = document.getElementById('audio-finish');
 let failCount = 0;
 let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 let lastBuffer = null;
+let currentSource = null;
 
 // --- PRELOAD ---
 window.onload = () => {
@@ -151,6 +152,16 @@ function renderPuzzle(i) {
 }
 
 // --- AUDIO ---
+function stopPlayback() {
+  if (currentSource) {
+    try {
+      currentSource.stop();
+    } catch (e) {
+      console.warn("Kunde inte stoppa ljud:", e);
+    }
+    currentSource = null;
+  }
+}
 function audioDecodeReverse(buf) {
   return audioCtx.decodeAudioData(buf).then(decoded => {
     for (let c = 0; c < decoded.numberOfChannels; c++) {
@@ -162,6 +173,7 @@ function audioDecodeReverse(buf) {
 }
 
 function playBuffer(buffer) {
+  stopPlayback();
   if (!buffer) return;
   const src = audioCtx.createBufferSource();
   src.buffer = buffer;
@@ -172,6 +184,7 @@ function playBuffer(buffer) {
 
 // --- KONTROLLERA SVAR ---
 function checkAnswer(p, ans, msgEl, hintEl) {
+  stopPlayback();
   if (p.type === 'prime') {
     const m = Math.floor((Date.now() - startTime) / 60000);
     p.answer = isPrime(m) ? String(m) : null;
