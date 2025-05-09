@@ -1,7 +1,7 @@
 {
   "name": "VÅRKAMP⁵",
   "short_name": "Vårkamp",
-  "start_url": "index.html",
+  "start_url": "/varkamp/index.html",
   "display": "standalone",
   "background_color": "#3b682d",
   "theme_color": "#3b682d",
@@ -9,7 +9,7 @@
   "description": "Ett interaktivt 5-delat puzzelspel med ljud, QR, stego och kryptologi.",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "/varkamp/icon-192.png",
       "sizes": "192x192",
       "type": "image/png"
     }
