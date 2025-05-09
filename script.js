@@ -1,5 +1,3 @@
-console.log("✅ JavaScript körs!");
-
 // --- KONFIGURATION av gåtorna ---
 const puzzles = [
   { prompt: '1: Vigenère – avkryptera “ujvjs kfcej” med nyckeln PENTA', type: 'text', answer: 'kamp', hint: 'Det är ett slags chiffer. Nyckeln är viktig.' },
@@ -94,16 +92,25 @@ function renderPuzzle(i) {
       break;
 
     case 'audio':
+      let buffer = null;
       fetch(p.src)
         .then(r => r.arrayBuffer())
         .then(buf => audioDecodeReverse(buf))
-        .then(buffer => playBuffer(buffer))
-        .catch(e => console.error('Audio error', e));
+        .then(decoded => buffer = decoded)
+        .catch(e => console.error('Ljudfel:', e));
+
       const rbtn = document.createElement('button');
       rbtn.type = 'button';
-      rbtn.textContent = 'Spela om baklänges';
-      rbtn.onclick = () => playBuffer(lastBuffer);
+      rbtn.textContent = 'Spela upp baklänges';
+      rbtn.onclick = () => {
+        if (!buffer) {
+          console.warn("Ljudet är inte redo ännu.");
+          return;
+        }
+        playBuffer(buffer);
+      };
       card.appendChild(rbtn);
+
       inputEl = document.createElement('input');
       inputEl.placeholder = 'Svara här';
       card.appendChild(inputEl);
