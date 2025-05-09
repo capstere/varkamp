@@ -23,6 +23,16 @@
     </header>
 
     <main id="app" role="main"></main>
+
+    <!-- JS-statusvisning -->
+    <noscript>
+      <div style="background:#ff4444;color:white;padding:1rem;border-radius:6px;margin-top:1rem;text-align:center;">
+        ⚠️ JavaScript är inte aktiverat i din webbläsare.
+      </div>
+    </noscript>
+    <div id="js-status" style="text-align:center;color:#888;margin-top:1rem;font-size:0.9rem;">
+      <em>Kontrollerar JavaScript...</em>
+    </div>
   </div>
 
   <!-- Ljudeffekter -->
@@ -30,7 +40,12 @@
   <audio id="audio-wrong"   src="assets/audio/wrong.mp3"   preload="auto"></audio>
   <audio id="audio-finish"  src="assets/audio/finish.mp3"  preload="auto"></audio>
 
-  <script defer src="script.js"></script>
+  <script>
+    // Visuell bekräftelse att JS körs
+    document.getElementById("js-status").innerHTML = 
+      "<span style='color:green;'>✅ JavaScript körs korrekt!</span>";
+  </script>
+  <script defer src="scripts.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
