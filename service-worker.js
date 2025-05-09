@@ -30,6 +30,12 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then(response => response || fetch(event.request))
+    caches.match(event.request).then(response =>
+      response || fetch(event.request).catch(() => new Response("⚠️ Offline – resursen kunde inte hämtas.", {
+        status: 503,
+        statusText: "Offline",
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+      }))
+    )
   );
 });
