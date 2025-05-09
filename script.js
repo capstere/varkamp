@@ -228,23 +228,3 @@ function isPrime(n) {
   }
   return true;
 }
-
-/* Visuell feedback på kort */
-.card.correct {
-  animation: blink-green 0.5s;
-}
-.card.shake {
-  animation: shake 0.4s;
-}
-@keyframes blink-green {
-  0%   { background-color: #b5ffbb; }
-  100% { background-color: var(--card); }
-}
-@keyframes shake {
-  0% { transform: translateX(0); }
-  20% { transform: translateX(-8px); }
-  40% { transform: translateX(8px); }
-  60% { transform: translateX(-8px); }
-  80% { transform: translateX(8px); }
-  100% { transform: translateX(0); }
-}
