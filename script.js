@@ -17,7 +17,7 @@ const aFinish  = document.getElementById('audio-finish');
 let failCount = 0;
 let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 let lastBuffer = null;
-let currentSource = null;
+
 
 // --- PRELOAD ---
 window.onload = () => {
@@ -32,6 +32,7 @@ window.onload = () => {
 
 // --- RENDER INTRO ---
 function renderIntro() {
+  localStorage.removeItem('varkamp_timer');
   clearInterval(timerId);
   app.innerHTML = `
     <div class="card">
@@ -39,9 +40,19 @@ function renderIntro() {
       <button id="start" type="button">Starta tävlingen</button>
     </div>`;
   document.getElementById('start').onclick = () => {
+    
+  const savedTime = localStorage.getItem('varkamp_timer');
+  if (savedTime) {
+    startTime = parseInt(savedTime);
+    timerId = setInterval(updateTimer, 500);
+    renderPuzzle(current);
+  } else {
     startTime = Date.now();
+    localStorage.setItem('varkamp_timer', startTime);
     timerId = setInterval(updateTimer, 500);
     renderPuzzle(0);
+  }
+
   };
 }
 
@@ -93,22 +104,18 @@ function renderPuzzle(i) {
       break;
 
     case 'audio':
-      let buffer = null;
-      fetch(p.src)
-        .then(r => r.arrayBuffer())
-        .then(buf => audioDecodeReverse(buf))
-        .then(decoded => buffer = decoded)
-        .catch(e => console.error('Ljudfel:', e));
-
+      let audioElement = new Audio(p.src);
       const rbtn = document.createElement('button');
       rbtn.type = 'button';
       rbtn.textContent = 'Spela upp baklänges';
       rbtn.onclick = () => {
-        if (!buffer) {
-          console.warn("Ljudet är inte redo ännu.");
-          return;
+        try {
+          audioElement.pause();
+          audioElement.currentTime = 0;
+        } catch (e) {
+          console.warn("Kunde inte pausa ljud:", e);
         }
-        playBuffer(buffer);
+        audioElement.play();
       };
       card.appendChild(rbtn);
 
@@ -149,6 +156,7 @@ function renderPuzzle(i) {
   card.appendChild(btn);
 
   app.appendChild(card);
+  if (inputEl) inputEl.focus();  // Autofokus
 }
 
 // --- AUDIO ---
@@ -162,52 +170,16 @@ function stopPlayback() {
     currentSource = null;
   }
 }
-function audioDecodeReverse(buf) {
-  return audioCtx.decodeAudioData(buf).then(decoded => {
-    for (let c = 0; c < decoded.numberOfChannels; c++) {
-      Array.prototype.reverse.call(decoded.getChannelData(c));
-    }
-    lastBuffer = decoded;
-    return decoded;
-  });
-}
-
-function playBuffer(buffer) {
-  stopPlayback();
-  if (!buffer) return;
-  const src = audioCtx.createBufferSource();
-  src.buffer = buffer;
-  src.connect(audioCtx.destination);
-  src.start();
-}
+// ljudet är redan baklänges – ingen decodeReverse behövs
 
 
-// --- KONTROLLERA SVAR ---
-function checkAnswer(p, ans, msgEl, hintEl) {
-  stopPlayback();
-  if (p.type === 'prime') {
-    const m = Math.floor((Date.now() - startTime) / 60000);
-    p.answer = isPrime(m) ? String(m) : null;
-  }
 
-  if (ans === String(p.answer)) {
-    if (current + 1 >= puzzles.length) {
-      aFinish.currentTime = 0;
-      aFinish.play().catch(err => console.warn("Finish-ljud blockerat:", err));
-    } else {
-      aCorrect.currentTime = 0;
-      aCorrect.play();
-    }
-    renderPuzzle(current + 1);
-  } else {
-    aWrong.currentTime = 0;
-    aWrong.play();
-    msgEl.textContent = 'Fel – försök igen!';
-    failCount++;
-    if (failCount >= 2 && p.hint) {
-      hintEl.textContent = `Tips: ${p.hint}`;
-    }
-  }
+// --- Spara poäng ---
+function saveCompletionStats() {
+  const ms = Date.now() - startTime;
+  const seconds = Math.floor(ms / 1000);
+  localStorage.setItem('varkamp_score', seconds);
+  localStorage.setItem('varkamp_finished', Date.now());
 }
 
 
@@ -245,6 +217,7 @@ function finish() {
 
   app.innerHTML = '';
   app.appendChild(card);
+  if (inputEl) inputEl.focus();  // Autofokus
 }
 
 // --- PRIMTAL ---
@@ -254,4 +227,24 @@ function isPrime(n) {
     if (n % i === 0) return false;
   }
   return true;
+}
+
+/* Visuell feedback på kort */
+.card.correct {
+  animation: blink-green 0.5s;
+}
+.card.shake {
+  animation: shake 0.4s;
+}
+@keyframes blink-green {
+  0%   { background-color: #b5ffbb; }
+  100% { background-color: var(--card); }
+}
+@keyframes shake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-8px); }
+  40% { transform: translateX(8px); }
+  60% { transform: translateX(-8px); }
+  80% { transform: translateX(8px); }
+  100% { transform: translateX(0); }
 }
