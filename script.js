@@ -28,6 +28,13 @@ window.onload = () => {
   renderIntro();
 };
 
+
+function restoreTimer() {
+  
+  timerId = setInterval(updateTimer, 500);
+}
+
+
 // --- RENDER INTRO ---
 function renderIntro() {
   localStorage.removeItem('varkamp_timer');
@@ -38,17 +45,8 @@ function renderIntro() {
       <button id="start" type="button">Starta tävlingen</button>
     </div>`;
   document.getElementById('start').onclick = () => {
-    const savedTime = localStorage.getItem('varkamp_timer');
-    if (savedTime) {
-      startTime = parseInt(savedTime);
-      timerId = setInterval(updateTimer, 500);
-      renderPuzzle(current);
-    } else {
-      startTime = Date.now();
-      localStorage.setItem('varkamp_timer', startTime);
-      timerId = setInterval(updateTimer, 500);
-      renderPuzzle(0);
-    }
+    restoreTimer();
+    
   };
 }
 
