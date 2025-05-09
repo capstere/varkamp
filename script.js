@@ -1,9 +1,9 @@
 // --- KONFIGURATION av gåtorna ---
 const puzzles = [
   { prompt: '1: Vigenère – avkryptera “ujvjs kfcej” med nyckeln PENTA', type: 'text', answer: 'kamp', hint: 'Det är ett slags chiffer. Nyckeln är viktig.' },
-  { prompt: '2: Bakom mörkret finner du svaret', type: 'stego', answer: '17', img: 'assets/images/stego.png', hint: 'Kom igen...' },
+  { prompt: '2: Bakom mörkret finner du svaret', type: 'stego', answer: '17', img: 'assets/images/stego.png', hint: 'Prova klicka på bilden.' },
   { prompt: '3: Vilken sång hör du?', type: 'audio', answer: 'editpir', src: 'assets/audio/p3-chorus-rev.mp3', hint: 'Baklängesmusik, lyssna noga.' },
-  { prompt: '4: Tajma svar med primtal', type: 'prime', answer: null, hint: 'Det är minuter...' },
+  { prompt: '4: Tajma svar med primtal', type: 'prime', answer: null, hint: 'Det är baserat på minuter som gått...' },
   { prompt: '5: Skanna QR‑koden för svaret', type: 'qr', answer: 'kramp', data: 'kramp', hint: 'QR-koden innehåller ordet!' }
 ];
 
@@ -38,12 +38,22 @@ function restoreTimer() {
     startTime = Date.now();
     localStorage.setItem('varkamp_timer', startTime);
   }
+
+  const savedPuzzle = parseInt(localStorage.getItem('varkamp_current'));
+  if (!isNaN(savedPuzzle) && savedPuzzle >= 0) {
+    current = savedPuzzle;
+  } else {
+    current = 0;
+  }
+
   timerId = setInterval(updateTimer, 500);
+  renderPuzzle(current);
 }
 
 
 // --- RENDER INTRO ---
 function renderIntro() {
+  localStorage.removeItem('varkamp_current');
   localStorage.removeItem('varkamp_timer');
   clearInterval(timerId);
   app.innerHTML = `
@@ -67,6 +77,7 @@ function updateTimer() {
 
 // --- RENDER PUZZLE ---
 function renderPuzzle(i) {
+  localStorage.setItem('varkamp_current', i);
   current = i;
   failCount = 0;
   app.innerHTML = '';
@@ -178,6 +189,7 @@ function saveCompletionStats() {
 
 // --- FINISH ---
 function finish() {
+  localStorage.removeItem('varkamp_current');
   clearInterval(timerId);
   aFinish.currentTime = 0;
   aFinish.play();
