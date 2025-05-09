@@ -169,6 +169,7 @@ function playBuffer(buffer) {
   src.start();
 }
 
+
 // --- KONTROLLERA SVAR ---
 function checkAnswer(p, ans, msgEl, hintEl) {
   if (p.type === 'prime') {
@@ -177,8 +178,13 @@ function checkAnswer(p, ans, msgEl, hintEl) {
   }
 
   if (ans === String(p.answer)) {
-    aCorrect.currentTime = 0;
-    aCorrect.play();
+    if (current + 1 >= puzzles.length) {
+      aFinish.currentTime = 0;
+      aFinish.play().catch(err => console.warn("Finish-ljud blockerat:", err));
+    } else {
+      aCorrect.currentTime = 0;
+      aCorrect.play();
+    }
     renderPuzzle(current + 1);
   } else {
     aWrong.currentTime = 0;
@@ -190,6 +196,7 @@ function checkAnswer(p, ans, msgEl, hintEl) {
     }
   }
 }
+
 
 // --- FINISH ---
 function finish() {
