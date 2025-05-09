@@ -6,11 +6,13 @@
   <title>VÅRKAMP⁵</title>
 
   <meta name="theme-color" content="#3b682d">
-  <link rel="manifest" href="./manifest.json">
-  <link rel="icon" href="./icon-192.png">
-  <link rel="stylesheet" href="./styles.css">
+  <link rel="manifest" href="/varkamp/manifest.json">
+  <link rel="icon" href="/varkamp/icon-192.png">
+  <link rel="stylesheet" href="/varkamp/styles.css">
 
+  <!-- SHA256 -->
   <script src="https://cdn.jsdelivr.net/npm/js-sha256@0.9.0/build/sha256.min.js"></script>
+  <!-- QR‑generator -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
@@ -24,15 +26,15 @@
   </div>
 
   <!-- Ljudeffekter -->
-  <audio id="audio-correct" src="./assets/audio/correct.mp3" preload="auto"></audio>
-  <audio id="audio-wrong"   src="./assets/audio/wrong.mp3"   preload="auto"></audio>
-  <audio id="audio-finish"  src="./assets/audio/finish.mp3"  preload="auto"></audio>
+  <audio id="audio-correct" src="/varkamp/assets/audio/correct.mp3" preload="auto"></audio>
+  <audio id="audio-wrong"   src="/varkamp/assets/audio/wrong.mp3"   preload="auto"></audio>
+  <audio id="audio-finish"  src="/varkamp/assets/audio/finish.mp3"  preload="auto"></audio>
 
-  <script defer src="./script.js"></script>
+  <script defer src="/varkamp/script.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js')
+        navigator.serviceWorker.register('/varkamp/service-worker.js')
           .then(reg => console.log('ServiceWorker OK', reg))
           .catch(err => console.warn('ServiceWorker FAIL', err));
       });
