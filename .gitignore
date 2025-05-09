@@ -1,17 +1,29 @@
 # macOS
 .DS_Store
 
-# Node/npm (för eventuell framtida automatisering)
+# Windows
+Thumbs.db
+
+# Node/npm (för ev. framtida automatisering)
 node_modules/
 npm-debug.log*
+package-lock.json
+.env
 
-# Service workers (byggen)
+# Service worker / PWA-cache / byggen
 dist/
 .cache/
+workbox-*.js
+service-worker.js.map
 
-# IDE/editor-filer
+# GitHub Pages cache
+*.log
+
+# Editor/IDE
 .vscode/
 .idea/
 
-# OS-temp
-Thumbs.db
+# Output
+*.zip
+*.bak
+*.tmp
