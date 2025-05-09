@@ -7,6 +7,9 @@
   "theme_color": "#3b682d",
   "orientation": "portrait",
   "description": "Ett interaktivt 5-delat puzzelspel med ljud, QR, stego och kryptologi.",
+  "scope": "/varkamp/",
+  "categories": ["game", "puzzle"],
+  "dir": "ltr"
   "icons": [
     {
       "src": "/varkamp/icon-192.png",
@@ -16,3 +19,4 @@
   ],
   "lang": "sv-SE"
 }
+
