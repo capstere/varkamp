@@ -18,6 +18,14 @@ let failCount = 0;
 let puzzleAudio = null; // Global ljudspelare
 
 // --- PRELOAD ---
+const styleFade = document.createElement('style');
+styleFade.textContent = `
+@keyframes fadeout {
+  0% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; display: none; }
+}`;
+document.head.appendChild(styleFade);
 window.onload = () => {
   ['correct', 'wrong', 'finish'].forEach(id => {
     const a = document.getElementById('audio-' + id);
@@ -175,6 +183,15 @@ function renderPuzzle(i) {
   btn.onclick = () => checkAnswer(p, inputEl.value.trim().toLowerCase(), msgEl, hintEl);
   card.appendChild(btn);
 
+  
+  if (i > 0 && !document.getElementById('restore-indicator')) {
+    const notice = document.createElement('div');
+    notice.id = 'restore-indicator';
+    notice.textContent = `🎯 Fortsätter där du slutade (Gåta ${i + 1})`;
+    notice.style.cssText = 'text-align:center;color:#fff;background:#444;padding:.5rem 1rem;margin-bottom:.75rem;border-radius:6px;animation:fadeout 3s forwards;';
+    app.prepend(notice);
+  }
+
   app.appendChild(card);
   if (inputEl) inputEl.focus();  // Autofokus
 }
@@ -222,6 +239,15 @@ function finish() {
   card.appendChild(restartBtn);
 
   app.innerHTML = '';
+  
+  if (i > 0 && !document.getElementById('restore-indicator')) {
+    const notice = document.createElement('div');
+    notice.id = 'restore-indicator';
+    notice.textContent = `🎯 Fortsätter där du slutade (Gåta ${i + 1})`;
+    notice.style.cssText = 'text-align:center;color:#fff;background:#444;padding:.5rem 1rem;margin-bottom:.75rem;border-radius:6px;animation:fadeout 3s forwards;';
+    app.prepend(notice);
+  }
+
   app.appendChild(card);
 }
 
