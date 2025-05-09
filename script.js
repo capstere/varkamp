@@ -1,9 +1,9 @@
 // --- KONFIGURATION av gåtorna ---
 const puzzles = [
   { prompt: '1: Vigenère – avkryptera “ujvjs kfcej” med nyckeln PENTA', type: 'text', answer: 'kamp', hint: 'Det är ett slags chiffer. Nyckeln är viktig.' },
-  { prompt: '2: Bakom mörkret finner du svaret', type: 'stego', answer: '17', img: 'assets/images/stego.png', hint: 'Prova klicka på bilden.' },
+  { prompt: '2: Bakom mörkret finner du svaret', type: 'stego', answer: '17', img: 'assets/images/stego.png', hint: 'Kom igen...' },
   { prompt: '3: Vilken sång hör du?', type: 'audio', answer: 'editpir', src: 'assets/audio/p3-chorus-rev.mp3', hint: 'Baklängesmusik, lyssna noga.' },
-  { prompt: '4: Tajma svar med primtal', type: 'prime', answer: null, hint: 'Det är baserat på minuter som gått...' },
+  { prompt: '4: Tajma svar med primtal', type: 'prime', answer: null, hint: 'Det är minuter...' },
   { prompt: '5: Skanna QR‑koden för svaret', type: 'qr', answer: 'kramp', data: 'kramp', hint: 'QR-koden innehåller ordet!' }
 ];
 
@@ -30,7 +30,14 @@ window.onload = () => {
 
 
 function restoreTimer() {
-  
+  const saved = localStorage.getItem('varkamp_timer');
+  const parsed = parseInt(saved);
+  if (!isNaN(parsed) && parsed > 0) {
+    startTime = parsed;
+  } else {
+    startTime = Date.now();
+    localStorage.setItem('varkamp_timer', startTime);
+  }
   timerId = setInterval(updateTimer, 500);
 }
 
