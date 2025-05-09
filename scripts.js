@@ -1,3 +1,5 @@
+console.log("✅ JavaScript körs!");
+
 // --- KONFIGURATION av gåtorna ---
 const puzzles = [
   { prompt: '1: Vigenère – avkryptera “ujvjs kfcej” med nyckeln PENTA', type: 'text', answer: 'kamp', hint: 'Det är ett slags chiffer. Nyckeln är viktig.' },
