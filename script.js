@@ -15,9 +15,7 @@ const aCorrect = document.getElementById('audio-correct');
 const aWrong   = document.getElementById('audio-wrong');
 const aFinish  = document.getElementById('audio-finish');
 let failCount = 0;
-let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-let lastBuffer = null;
-
+let puzzleAudio = null; // Global ljudspelare
 
 // --- PRELOAD ---
 window.onload = () => {
@@ -40,19 +38,17 @@ function renderIntro() {
       <button id="start" type="button">Starta tävlingen</button>
     </div>`;
   document.getElementById('start').onclick = () => {
-    
-  const savedTime = localStorage.getItem('varkamp_timer');
-  if (savedTime) {
-    startTime = parseInt(savedTime);
-    timerId = setInterval(updateTimer, 500);
-    renderPuzzle(current);
-  } else {
-    startTime = Date.now();
-    localStorage.setItem('varkamp_timer', startTime);
-    timerId = setInterval(updateTimer, 500);
-    renderPuzzle(0);
-  }
-
+    const savedTime = localStorage.getItem('varkamp_timer');
+    if (savedTime) {
+      startTime = parseInt(savedTime);
+      timerId = setInterval(updateTimer, 500);
+      renderPuzzle(current);
+    } else {
+      startTime = Date.now();
+      localStorage.setItem('varkamp_timer', startTime);
+      timerId = setInterval(updateTimer, 500);
+      renderPuzzle(0);
+    }
   };
 }
 
@@ -69,6 +65,12 @@ function renderPuzzle(i) {
   current = i;
   failCount = 0;
   app.innerHTML = '';
+
+  if (puzzleAudio) {
+    puzzleAudio.pause();
+    puzzleAudio.currentTime = 0;
+    puzzleAudio = null;
+  }
 
   if (i >= puzzles.length) return finish();
 
@@ -104,18 +106,20 @@ function renderPuzzle(i) {
       break;
 
     case 'audio':
-      let audioElement = new Audio(p.src);
+      puzzleAudio = new Audio(p.src);
+      puzzleAudio.preload = 'auto';
       const rbtn = document.createElement('button');
       rbtn.type = 'button';
       rbtn.textContent = 'Spela upp baklänges';
       rbtn.onclick = () => {
         try {
-          audioElement.pause();
-          audioElement.currentTime = 0;
+          puzzleAudio.pause();
+          puzzleAudio.currentTime = 0;
+          puzzleAudio.play();
         } catch (e) {
-          console.warn("Kunde inte pausa ljud:", e);
+          console.warn("Kunde inte spela upp ljud:", e);
         }
-        audioElement.play();
+        rbtn.textContent = '▶ Spela igen';
       };
       card.appendChild(rbtn);
 
@@ -159,21 +163,6 @@ function renderPuzzle(i) {
   if (inputEl) inputEl.focus();  // Autofokus
 }
 
-// --- AUDIO ---
-function stopPlayback() {
-  if (currentSource) {
-    try {
-      currentSource.stop();
-    } catch (e) {
-      console.warn("Kunde inte stoppa ljud:", e);
-    }
-    currentSource = null;
-  }
-}
-// ljudet är redan baklänges – ingen decodeReverse behövs
-
-
-
 // --- Spara poäng ---
 function saveCompletionStats() {
   const ms = Date.now() - startTime;
@@ -182,12 +171,12 @@ function saveCompletionStats() {
   localStorage.setItem('varkamp_finished', Date.now());
 }
 
-
 // --- FINISH ---
 function finish() {
   clearInterval(timerId);
   aFinish.currentTime = 0;
   aFinish.play();
+  saveCompletionStats();
 
   const card = document.createElement('div');
   card.className = 'card';
@@ -217,7 +206,44 @@ function finish() {
 
   app.innerHTML = '';
   app.appendChild(card);
-  if (inputEl) inputEl.focus();  // Autofokus
+}
+
+// --- KONTROLLERA SVAR ---
+function checkAnswer(p, ans, msgEl, hintEl) {
+  if (puzzleAudio) {
+    try {
+      puzzleAudio.pause();
+      puzzleAudio.currentTime = 0;
+    } catch (e) {
+      console.warn("Kunde inte stoppa ljudet:", e);
+    }
+    puzzleAudio = null;
+  }
+
+  if (p.type === 'prime') {
+    const m = Math.floor((Date.now() - startTime) / 60000);
+    p.answer = isPrime(m) ? String(m) : null;
+  }
+
+  if (ans === String(p.answer)) {
+    if (current + 1 >= puzzles.length) {
+      aFinish.currentTime = 0;
+      aFinish.play();
+      saveCompletionStats();
+    } else {
+      aCorrect.currentTime = 0;
+      aCorrect.play();
+    }
+    renderPuzzle(current + 1);
+  } else {
+    aWrong.currentTime = 0;
+    aWrong.play();
+    msgEl.textContent = '❌ Fel – försök igen!';
+    failCount++;
+    if (failCount >= 2 && p.hint) {
+      hintEl.textContent = `Tips: ${p.hint}`;
+    }
+  }
 }
 
 // --- PRIMTAL ---
