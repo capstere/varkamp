@@ -1,16 +1,15 @@
 const CACHE_NAME = 'varkamp-v1';
 const URLS_TO_CACHE = [
-  '/varkamp/',
-  '/varkamp/index.html',
-  '/varkamp/styles.css',
-  '/varkamp/script.js',
-  '/varkamp/manifest.json',
-  '/varkamp/icon-192.png',
-  '/varkamp/assets/audio/correct.mp3',
-  '/varkamp/assets/audio/wrong.mp3',
-  '/varkamp/assets/audio/finish.mp3',
-  '/varkamp/assets/audio/p3-chorus-rev.mp3',
-  '/varkamp/assets/images/stego.png'
+  'index.html',
+  'styles.css',
+  'script.js',
+  'manifest.json',
+  'icon-192.png',
+  'assets/audio/correct.mp3',
+  'assets/audio/wrong.mp3',
+  'assets/audio/finish.mp3',
+  'assets/audio/p3-chorus-rev.mp3',
+  'assets/images/stego.png'
 ];
 
 self.addEventListener('install', event => {
