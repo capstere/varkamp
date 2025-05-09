@@ -23,12 +23,24 @@
     </header>
 
     <main id="app" role="main"></main>
-    
+
+    <!-- Statusindikator för JS -->
+    <noscript>
+      <div style="padding:1rem;background:#e3342f;color:white;text-align:center;border-radius:6px;margin-top:1rem;">
+        ⚠️ JavaScript krävs för att sidan ska fungera.
+      </div>
+    </noscript>
+    <div id="js-status" style="text-align:center;color:#999;margin-top:1rem;">
+      <em>Kontrollerar JavaScript...</em>
+    </div>
+  </div>
+
   <!-- Ljudeffekter -->
   <audio id="audio-correct" src="assets/audio/correct.mp3" preload="auto"></audio>
   <audio id="audio-wrong"   src="assets/audio/wrong.mp3"   preload="auto"></audio>
   <audio id="audio-finish"  src="assets/audio/finish.mp3"  preload="auto"></audio>
 
+  <!-- JS-laddning -->
   <script>
     // Visuell bekräftelse att JS körs
     document.getElementById("js-status").innerHTML = 
