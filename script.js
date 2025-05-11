@@ -144,7 +144,7 @@ function renderPuzzle(i) {
         } catch (e) {
           console.warn("Kunde inte spela upp ljud:", e);
         }
-        rbtn.textContent = '▶ Spela igen';
+        rbtn.textContent = 'yalpeR';
       };
       card.appendChild(rbtn);
 
