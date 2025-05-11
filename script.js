@@ -15,7 +15,7 @@ const aCorrect = document.getElementById('audio-correct');
 const aWrong   = document.getElementById('audio-wrong');
 const aFinish  = document.getElementById('audio-finish');
 let failCount = 0;
-let puzzleAudio = null; // Global ljudspelare
+let puzzleAudio = null;
 
 // --- PRELOAD ---
 const styleFade = document.createElement('style');
@@ -26,17 +26,24 @@ styleFade.textContent = `
   100% { opacity: 0; display: none; }
 }`;
 document.head.appendChild(styleFade);
+
 window.onload = () => {
   ['correct', 'wrong', 'finish'].forEach(id => {
     const a = document.getElementById('audio-' + id);
     a.load();
   });
+
   const img = new Image();
   img.src = puzzles.find(p => p.type === 'stego').img;
-  renderIntro();
+
+  if (localStorage.getItem('varkamp_current')) {
+    restoreTimer();
+  } else {
+    renderIntro();
+  }
 };
 
-
+// --- TIMER-ÅTERSTÄLLNING ---
 function restoreTimer() {
   const saved = localStorage.getItem('varkamp_timer');
   const parsed = parseInt(saved);
@@ -58,10 +65,8 @@ function restoreTimer() {
   renderPuzzle(current);
 }
 
-
-// --- RENDER INTRO ---
+// --- INTRO ---
 function renderIntro() {
-  if (localStorage.getItem('varkamp_current')) return;
   localStorage.removeItem('varkamp_current');
   localStorage.removeItem('varkamp_timer');
   clearInterval(timerId);
@@ -72,7 +77,6 @@ function renderIntro() {
     </div>`;
   document.getElementById('start').onclick = () => {
     restoreTimer();
-    
   };
 }
 
@@ -184,7 +188,6 @@ function renderPuzzle(i) {
   btn.onclick = () => checkAnswer(p, inputEl.value.trim().toLowerCase(), msgEl, hintEl);
   card.appendChild(btn);
 
-  
   if (i > 0 && !document.getElementById('restore-indicator')) {
     const notice = document.createElement('div');
     notice.id = 'restore-indicator';
@@ -194,7 +197,7 @@ function renderPuzzle(i) {
   }
 
   app.appendChild(card);
-  if (inputEl) inputEl.focus();  // Autofokus
+  if (inputEl) inputEl.focus();
 }
 
 // --- Spara poäng ---
@@ -233,23 +236,11 @@ function finish() {
     }
   };
   card.appendChild(shareBtn);
-
-  // Starta om-knapp borttagen – spelet kan inte återstartas.
-
   app.innerHTML = '';
-  
-  if (i > 0 && !document.getElementById('restore-indicator')) {
-    const notice = document.createElement('div');
-    notice.id = 'restore-indicator';
-    notice.textContent = `🎯 Fortsätter där du slutade (Gåta ${i + 1})`;
-    notice.style.cssText = 'text-align:center;color:#fff;background:#444;padding:.5rem 1rem;margin-bottom:.75rem;border-radius:6px;animation:fadeout 3s forwards;';
-    app.prepend(notice);
-  }
-
   app.appendChild(card);
 }
 
-// --- KONTROLLERA SVAR ---
+// --- SVARKOLL ---
 function checkAnswer(p, ans, msgEl, hintEl) {
   if (puzzleAudio) {
     try {
@@ -287,7 +278,7 @@ function checkAnswer(p, ans, msgEl, hintEl) {
   }
 }
 
-// --- PRIMTAL ---
+// --- PRIMTALSHJÄLP ---
 function isPrime(n) {
   if (n < 2) return false;
   for (let i = 2; i * i <= n; i++) {
