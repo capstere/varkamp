@@ -53,10 +53,37 @@ header h1 {
   animation: pulse 1.5s infinite;
 }
 
+#progress {
+  margin-top: .25rem;
+  font-size: 1rem;
+}
+
 @keyframes pulse {
   0%   { box-shadow: 0 0 0 0 rgba(255,221,87,0.5); }
   70%  { box-shadow: 0 0 0 10px rgba(255,221,87,0); }
   100% { box-shadow: 0 0 0 0 rgba(255,221,87,0); }
+}
+
+.noscript-warning {
+  padding:1rem;
+  background:#e3342f;
+  color:white;
+  text-align:center;
+  border-radius:6px;
+  margin-top:1rem;
+}
+
+.update-banner {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: var(--bg);
+  padding: .5rem 1rem;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  z-index: 1000;
 }
 
 .card {
@@ -94,17 +121,13 @@ input::placeholder {
   color: rgba(0,0,0,0.5);
 }
 
-button:active {
-  opacity: .8;
-}
-
-button {
-  cursor: pointer;
-}
-
 button:hover {
   filter: brightness(0.95);
-  transition: filter 0.2s ease;
+}
+
+button:active {
+  opacity: .8;
+  transition: none;
 }
 
 input:focus-visible,
@@ -131,105 +154,27 @@ button:focus-visible {
   to   { opacity: 1; }
 }
 
-.card img {
-  width: 100%;
-  border-radius: var(--radius);
-  margin: .75rem 0;
-  cursor: pointer;
-}
-
-.canvas-mosaic {
-  width: 100%;
-  touch-action: none;
-  border: 2px solid var(--fg);
-  border-radius: var(--radius);
-  margin-bottom: 1rem;
-}
-
-.blend-container {
-  position: relative;
-  width: 100%;
-  height: 200px;
-  border-radius: var(--radius);
-  overflow: hidden;
-  margin-bottom: 1rem;
-}
-
-.blend-layer {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
-.blend-text {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 2rem;
-  font-weight: bold;
-  opacity: 0;
-  transition: opacity .2s;
-}
-
-@media (max-width: 400px) {
-  header h1 {
-    font-size: 1.3rem;
-  }
-
-  .blend-text {
-    font-size: 1.5rem;
-  }
-}
-
-/* Visuell feedback på kort */
 .card.correct {
   animation: blink-green 0.5s;
 }
 .card.shake {
   animation: shake 0.4s;
 }
+
 @keyframes blink-green {
   0%   { background-color: #b5ffbb; }
   100% { background-color: var(--card); }
 }
 @keyframes shake {
-  0% { transform: translateX(0); }
-  20% { transform: translateX(-8px); }
-  40% { transform: translateX(8px); }
-  60% { transform: translateX(-8px); }
-  80% { transform: translateX(8px); }
+  0%   { transform: translateX(0); }
+  20%  { transform: translateX(-8px); }
+  40%  { transform: translateX(8px); }
+  60%  { transform: translateX(-8px); }
+  80%  { transform: translateX(8px); }
   100% { transform: translateX(0); }
 }
 
-/* === FORMULÄR I SLUTSTEGET === */
-.card label {
-  display: block;
-  margin-top: 1rem;
-  font-weight: bold;
-  font-size: 0.95rem;
-}
-
-.card input[type="file"] {
-  padding: 0.5rem 0;
-  background: none;
-  color: var(--fg);
-  font-size: 0.9rem;
-}
-
-.card input[type="file"]::file-selector-button {
-  background: var(--btn-bg);
-  color: var(--btn-fg);
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: var(--radius);
-  cursor: pointer;
-  margin-right: 1rem;
-  font-size: 0.9rem;
-}
-
-.card input[type="file"]::file-selector-button:hover {
-  filter: brightness(0.95);
+/* Mobiljustering */
+@media (max-width: 400px) {
+  header h1 { font-size: 1.3rem; }
 }
