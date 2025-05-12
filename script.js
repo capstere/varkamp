@@ -49,8 +49,6 @@ window.onload = () => {
   }
 };
 
-
-// --- TIMER-ÅTERSTÄLLNING ---
 function restoreTimer() {
   const saved = localStorage.getItem('varkamp_timer');
   const parsed = parseInt(saved);
@@ -64,7 +62,6 @@ function restoreTimer() {
   renderPuzzle(current);
 }
 
-// --- INTRO ---
 function renderIntro() {
   localStorage.removeItem('varkamp_current');
   localStorage.removeItem('varkamp_timer');
@@ -79,7 +76,6 @@ function renderIntro() {
   };
 }
 
-// --- TIMER ---
 function updateTimer() {
   const d = Date.now() - startTime;
   const m = String(Math.floor(d / 60000)).padStart(2, '0');
@@ -87,9 +83,6 @@ function updateTimer() {
   timer.textContent = `${m}:${s}`;
 }
 
-
-
-// --- RENDER PUZZLE ---
 function renderPuzzle(i) {
   localStorage.setItem('varkamp_current', i);
   current = i;
@@ -117,12 +110,8 @@ function renderPuzzle(i) {
 
   switch (p.type) {
     case 'name':
-      inputEl = document.createElement('input');
-      inputEl.placeholder = 'Skriv ett deltagarnamn';
-      card.appendChild(inputEl);
-      break;
-
     case 'text':
+    case 'prime':
       inputEl = document.createElement('input');
       inputEl.placeholder = 'Skriv svar';
       card.appendChild(inputEl);
@@ -144,27 +133,16 @@ function renderPuzzle(i) {
       puzzleAudio = new Audio(p.src);
       puzzleAudio.preload = 'auto';
       const rbtn = document.createElement('button');
-      rbtn.type = 'button';
       rbtn.textContent = 'Spela upp baklänges';
       rbtn.onclick = () => {
-        try {
-          puzzleAudio.pause();
-          puzzleAudio.currentTime = 0;
-          puzzleAudio.play();
-        } catch (e) {
-          console.warn("Kunde inte spela upp ljud:", e);
-        }
-        rbtn.textContent = 'yalpeR';
+        puzzleAudio.pause();
+        puzzleAudio.currentTime = 0;
+        puzzleAudio.play();
+        rbtn.textContent = '...spelar';
       };
       card.appendChild(rbtn);
       inputEl = document.createElement('input');
       inputEl.placeholder = 'Svara här';
-      card.appendChild(inputEl);
-      break;
-
-    case 'prime':
-      inputEl = document.createElement('input');
-      inputEl.placeholder = 'Ditt svar';
       card.appendChild(inputEl);
       break;
 
@@ -196,49 +174,43 @@ function renderPuzzle(i) {
   if (inputEl) inputEl.focus();
 }
 
-// --- SVARKOLL ---
 function checkAnswer(p, ans, msgEl, hintEl) {
   if (puzzleAudio) {
-    try {
-      puzzleAudio.pause();
-      puzzleAudio.currentTime = 0;
-    } catch (e) {
-      console.warn("Kunde inte stoppa ljudet:", e);
-    }
+    puzzleAudio.pause();
+    puzzleAudio.currentTime = 0;
     puzzleAudio = null;
   }
 
   if (p.type === 'prime') {
     const m = Math.floor((Date.now() - startTime) / 60000);
-    p.answer = isPrime(m) ? String(m) : null;
+    if (!isPrime(m)) {
+      msgEl.textContent = '⏳ Vänta till ett primtal-minut!';
+      return;
+    }
+    p.answer = String(m);
   }
 
   if (p.type === 'name') {
     if (validNames.includes(ans)) {
-      aCorrect.currentTime = 0;
-      aCorrect.play();
+      aCorrect.currentTime = 0; aCorrect.play();
       renderPuzzle(current + 1);
     } else {
-      aWrong.currentTime = 0;
-      aWrong.play();
-      msgEl.textContent = '❌ Fel – skriv ett korrekt namn.';
+      aWrong.currentTime = 0; aWrong.play();
+      msgEl.textContent = '❌ Fel – är det ens en person?';
     }
     return;
   }
 
   if (ans === String(p.answer)) {
     if (current + 1 >= puzzles.length) {
-      aFinish.currentTime = 0;
-      aFinish.play();
+      aFinish.currentTime = 0; aFinish.play();
       saveCompletionStats();
     } else {
-      aCorrect.currentTime = 0;
-      aCorrect.play();
+      aCorrect.currentTime = 0; aCorrect.play();
     }
     renderPuzzle(current + 1);
   } else {
-    aWrong.currentTime = 0;
-    aWrong.play();
+    aWrong.currentTime = 0; aWrong.play();
     msgEl.textContent = '❌ Fel – försök igen!';
     failCount++;
     if (failCount >= 2 && p.hint) {
@@ -247,14 +219,14 @@ function checkAnswer(p, ans, msgEl, hintEl) {
   }
 }
 
-
-// --- FINISH ---
 function finish() {
   localStorage.removeItem('varkamp_current');
   clearInterval(timerId);
   aFinish.currentTime = 0;
   aFinish.play();
   saveCompletionStats();
+
+  const seconds = Math.floor((Date.now() - startTime) / 1000);
 
   const card = document.createElement('div');
   card.className = 'card';
@@ -271,6 +243,9 @@ function finish() {
     <label>Slutlösenord:</label>
     <input placeholder="Ex: KRAMP123">
 
+    <label>Tid:</label>
+    <input readonly value="${seconds} sekunder">
+
     <label>Ladda upp bild:</label>
     <input type="file" accept="image/*">
 
@@ -281,7 +256,6 @@ function finish() {
   app.appendChild(card);
 }
 
-// --- Spara poäng ---
 function saveCompletionStats() {
   const ms = Date.now() - startTime;
   const seconds = Math.floor(ms / 1000);
@@ -289,7 +263,6 @@ function saveCompletionStats() {
   localStorage.setItem('varkamp_finished', Date.now());
 }
 
-// --- PRIMTALSHJÄLP ---
 function isPrime(n) {
   if (n < 2) return false;
   for (let i = 2; i * i <= n; i++) {
