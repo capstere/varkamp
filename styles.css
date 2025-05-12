@@ -2,7 +2,7 @@
 :root {
   --bg: #3b682d;
   --fg: #fff;
-  --card-bg: rgba(255,255,255,0.1);
+  --card-bg: rgba(255,255,255,0.15);
   --btn-bg: #f1fbc1;
   --btn-fg: #000;
   --accent: #ffdd57;
@@ -11,7 +11,7 @@
   --error: #ff4444;
   --success: #8bc34a;
   --font: -apple-system, Roboto, sans-serif;
-  --contrast-text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+  --text-shadow: 0 1px 2px rgba(0,0,0,0.7);
 }
 
 * {
@@ -24,11 +24,11 @@ body {
   background: var(--bg);
   color: var(--fg);
   font-family: var(--font);
+  text-shadow: var(--text-shadow);
   display: flex;
   justify-content: center;
   padding: 1rem;
   min-height: 100vh;
-  text-shadow: var(--contrast-text-shadow);
 }
 
 .wrapper {
@@ -43,7 +43,7 @@ header {
 
 header h1 {
   font-size: 1.8rem;
-  text-shadow: var(--contrast-text-shadow);
+  text-shadow: var(--text-shadow);
 }
 
 #timer {
@@ -51,9 +51,9 @@ header h1 {
   font-size: 1.25rem;
   background: var(--accent);
   color: var(--bg);
-  display: inline-block;
   padding: .25rem .75rem;
   border-radius: var(--radius);
+  display: inline-block;
   animation: pulse 1.5s infinite;
 }
 
@@ -63,8 +63,8 @@ header h1 {
 }
 
 @keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(255,221,87,0.5); }
-  70% { box-shadow: 0 0 0 10px rgba(255,221,87,0); }
+  0%   { box-shadow: 0 0 0 0 rgba(255,221,87,0.5); }
+  70%  { box-shadow: 0 0 0 10px rgba(255,221,87,0); }
   100% { box-shadow: 0 0 0 0 rgba(255,221,87,0); }
 }
 
@@ -107,7 +107,7 @@ header h1 {
 .prompt {
   font-size: 1.3rem;
   margin-bottom: .75rem;
-  text-shadow: var(--contrast-text-shadow);
+  text-shadow: var(--text-shadow);
 }
 
 input, button {
@@ -156,7 +156,7 @@ input:focus-visible, button:focus-visible {
 
 @keyframes fadein {
   from { opacity: 0; }
-  to { opacity: 1; }
+  to   { opacity: 1; }
 }
 
 .card.correct {
@@ -168,20 +168,20 @@ input:focus-visible, button:focus-visible {
 }
 
 @keyframes blink-green {
-  0% { background-color: #b5ffbb; }
+  0%   { background-color: #b5ffbb; }
   100% { background-color: var(--card-bg); }
 }
 
 @keyframes shake {
-  0% { transform: translateX(0); }
-  20% { transform: translateX(-8px); }
-  40% { transform: translateX(8px); }
-  60% { transform: translateX(-8px); }
-  80% { transform: translateX(8px); }
+  0%   { transform: translateX(0); }
+  20%  { transform: translateX(-8px); }
+  40%  { transform: translateX(8px); }
+  60%  { transform: translateX(-8px); }
+  80%  { transform: translateX(8px); }
   100% { transform: translateX(0); }
 }
 
-/* Responsiv stego-bild */
+/* --- Responsiv stego-bild --- */
 .card img {
   width: 100%;
   height: auto;
@@ -190,21 +190,20 @@ input:focus-visible, button:focus-visible {
   cursor: pointer;
 }
 
-/* Responsiv QR-kod */
+/* --- Responsiv QR-kod --- */
 .card #qrcode {
   width: 100%;
   max-width: 300px;
   margin: .75rem auto;
 }
-
 .card #qrcode canvas {
   width: 100% !important;
   height: auto !important;
   display: block;
 }
 
-/* Mobiljustering */
+/* --- Mobiljustering --- */
 @media (max-width: 400px) {
-  header h1 { font-size: 1.5rem; }
-  .prompt     { font-size: 1.2rem; }
+  header h1  { font-size: 1.5rem; }
+  .prompt    { font-size: 1.2rem; }
 }
