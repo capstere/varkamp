@@ -2,16 +2,16 @@
 <html lang="sv">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>VÅRKAMP⁵</title>
   <meta name="theme-color" content="#3b682d">
   <meta name="description" content="Ett interaktivt 5-delat utomhuspussel med ljud, stego, kryptologi och dokumentation.">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
+  <!-- Valfri iOS-splash: -->
+  <!-- <link rel="apple-touch-startup-image" href="splash.png"> -->
   <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/js-sha256@0.9.0/build/sha256.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
   <div class="wrapper">
@@ -33,9 +33,10 @@
   <audio id="audio-wrong"   src="assets/audio/wrong.mp3"   preload="auto"></audio>
   <audio id="audio-finish"  src="assets/audio/finish.mp3"  preload="auto"></audio>
 
+  <!-- Huvudlogik -->
   <script defer src="script.js"></script>
   <script>
-    // SW-registrering med uppdateringsbanner
+    // Registrera Service Worker och visa uppdateringsbanner
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('service-worker.js')
@@ -49,16 +50,23 @@
                 }
               });
             });
-          });
+          })
+          .catch(() => {/* ignore */});
       });
+
       navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
     }
+
     function showUpdate(reg) {
-      const b = document.createElement('div');
-      b.className = 'update-banner';
-      b.innerHTML = `Ny version finns! <button id="upd">Uppdatera</button>`;
-      document.body.appendChild(b);
-      b.querySelector('#upd').onclick = () => reg.waiting.postMessage({type:'SKIP_WAITING'});
+      const banner = document.createElement('div');
+      banner.className = 'update-banner';
+      banner.innerHTML = `
+        <p>Ny version finns! <button id="reloadBtn">Uppdatera</button></p>
+      `;
+      document.body.appendChild(banner);
+      banner.querySelector('#reloadBtn').addEventListener('click', () => {
+        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      });
     }
   </script>
 </body>
