@@ -8,17 +8,12 @@
   "orientation": "portrait",
   "description": "Ett interaktivt 5-delat puzzelspel med ljud, QR, stego och kryptologi.",
   "scope": "/",
-  "categories": [
-    "game",
-    "puzzle"
-  ],
+  "categories": ["game","puzzle"],
   "dir": "ltr",
-  "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    }
-  ],
+  "icons": [{
+    "src": "icon-192.png",
+    "sizes": "192x192",
+    "type": "image/png"
+  }],
   "lang": "sv-SE"
 }
