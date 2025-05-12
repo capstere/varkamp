@@ -19,9 +19,9 @@
 
   // --- LocalStorage-wrappers ---
   const storage = {
-    get(k)    { try { return localStorage.getItem(k); } catch { return null; } },
-    set(k,v)  { try { localStorage.setItem(k,v); } catch {} },
-    del(k)    { try { localStorage.removeItem(k); } catch {} }
+    get(k){ try{return localStorage.getItem(k);}catch{return null;} },
+    set(k,v){ try{localStorage.setItem(k,v);}catch{} },
+    del(k){ try{localStorage.removeItem(k);}catch{} }
   };
 
   // --- Global state ---
@@ -46,17 +46,17 @@
     for (let i = 2; i * i <= n; i++) if (n % i === 0) return false;
     return true;
   }
-  function vibrate(p)    { navigator.vibrate?.(p); }
+  function vibrate(p)        { navigator.vibrate?.(p); }
   function play(type) {
     const a = sounds[type];
-    if (a) a.play().catch(()=>{});
-    if (type === 'correct') vibrate(200);
-    if (type === 'wrong')   vibrate([100,50,100]);
+    if (a) { a.currentTime = 0; a.play().catch(()=>{}); }
+    if (type==='correct') vibrate(200);
+    if (type==='wrong')   vibrate([100,50,100]);
   }
-  function showError(el, msg) { el.textContent = msg; }
-  function clearAnim(el)      { el.classList.remove('correct','shake'); }
+  function showError(el,msg){ el.textContent = msg; }
+  function clearAnim(el)    { el.classList.remove('correct','shake'); }
 
-  // --- Timer-uppdatering (i header) ---
+  // --- Timer-uppdatering ---
   function updateTimer() {
     const d = Date.now() - startTime;
     const mm = String(Math.floor(d/60000)).padStart(2,'0');
@@ -66,28 +66,24 @@
 
   // --- Init ---
   function init() {
-    // Preload ljud och stegobild
-    Object.values(sounds).forEach(a => a.load());
-    new Image().src = puzzles.find(p => p.type==='stego').img;
-
+    Object.values(sounds).forEach(a=>a.load());
+    new Image().src = puzzles.find(p=>p.type==='stego').img;
     if (storage.get('varkamp_current')) resumeGame();
     else showIntro();
   }
 
-  // --- Återuppta efter reload ---
+  // --- Resume ---
   function resumeGame() {
-    const saved = parseInt(storage.get('varkamp_timer'), 10);
-    startTime = saved > 0 ? saved : Date.now();
+    const saved = parseInt(storage.get('varkamp_timer'),10);
+    startTime = saved>0? saved: Date.now();
     storage.set('varkamp_timer', startTime);
-
-    const idx = parseInt(storage.get('varkamp_current'), 10);
-    current = (idx >= 0 && idx < puzzles.length) ? idx : 0;
-
-    timerId = setInterval(updateTimer, 500);
+    const idx = parseInt(storage.get('varkamp_current'),10);
+    current = (idx>=0 && idx<puzzles.length)? idx:0;
+    timerId = setInterval(updateTimer,500);
     renderPuzzle(current);
   }
 
-  // --- Visa intro-kort ---
+  // --- Intro ---
   function showIntro() {
     storage.del('varkamp_current');
     storage.del('varkamp_timer');
@@ -97,119 +93,109 @@
         <p class="prompt">Välkommen till VÅRKAMP<sup>5</sup>!</p>
         <button id="startBtn">Starta tävlingen</button>
       </div>`;
-    document.getElementById('startBtn').addEventListener('click', resumeGame);
+    document.getElementById('startBtn').onclick = resumeGame;
   }
 
-  // --- Rendera gåta 1–4 + final ---
+  // --- Rendera puzzle ---
   function renderPuzzle(i) {
     storage.set('varkamp_current', i);
     current = i; failCount = 0;
     app.innerHTML = '';
     progEl.textContent = `Gåta ${i+1} av ${puzzles.length}`;
-    if (!timerId) timerId = setInterval(updateTimer, 500);
-    if (puzzleAudio) { puzzleAudio.pause(); puzzleAudio = null; }
+    if (!timerId) timerId = setInterval(updateTimer,500);
+    if (puzzleAudio) { puzzleAudio.pause(); puzzleAudio=null; }
 
     const p = puzzles[i];
     if (!p) return;
 
-    if (p.type === 'final') {
-      renderFinal();
-      return;
-    }
+    if (p.type==='final') { renderFinal(); return; }
 
     // --- Gåtor 1–4 ---
-    const card = document.createElement('div'); card.className = 'card';
-    const prm  = document.createElement('div'); prm.className = 'prompt'; prm.textContent = p.prompt;
-    card.appendChild(prm);
+    const card = document.createElement('div'); card.className='card';
+    const prm  = document.createElement('div'); prm.className='prompt'; prm.textContent=p.prompt;
+    card.append(prm);
 
     let inputEl, msgEl, hintEl;
-    switch (p.type) {
+    switch(p.type){
       case 'name':
       case 'prime':
         inputEl = document.createElement('input');
-        inputEl.placeholder = 'Skriv svar';
-        card.appendChild(inputEl);
+        inputEl.placeholder='Skriv svar';
+        card.append(inputEl);
         break;
       case 'stego':
         const img = document.createElement('img');
-        img.src = p.img; img.alt = 'Stegobild'; img.style.filter = 'brightness(0)';
-        img.addEventListener('click', ()=> img.style.filter = '');
-        card.appendChild(img);
+        img.src=p.img; img.alt='Stegobild'; img.style.filter='brightness(0)';
+        img.onclick=()=>img.style.filter='';
+        card.append(img);
         inputEl = document.createElement('input');
-        inputEl.placeholder = 'Tal (siffror)';
-        card.appendChild(inputEl);
+        inputEl.placeholder='Tal (siffror)';
+        card.append(inputEl);
         break;
       case 'audio':
-        puzzleAudio = new Audio(p.src); puzzleAudio.preload = 'auto';
-        const btn = document.createElement('button');
-        btn.textContent = 'Spela baklänges';
-        btn.addEventListener('click', ()=>{
-          puzzleAudio.currentTime = 0;
-          puzzleAudio.play().catch(()=>{});
-          btn.textContent = '...spelar';
-        });
-        card.appendChild(btn);
+        puzzleAudio=new Audio(p.src); puzzleAudio.preload='auto';
+        const btn=document.createElement('button');
+        btn.textContent='Spela baklänges';
+        btn.onclick=()=>{
+          puzzleAudio.currentTime=0; puzzleAudio.play().catch(()=>{});
+          btn.textContent='...spelar';
+        };
+        card.append(btn);
         inputEl = document.createElement('input');
-        inputEl.placeholder = 'Svara här';
-        card.appendChild(inputEl);
+        inputEl.placeholder='Svara här';
+        card.append(inputEl);
         break;
     }
 
-    msgEl  = document.createElement('div'); msgEl.className = 'error-msg';
-    hintEl = document.createElement('div'); hintEl.className = 'hint-msg';
-    card.appendChild(msgEl); card.appendChild(hintEl);
+    msgEl=document.createElement('div'); msgEl.className='error-msg';
+    hintEl=document.createElement('div'); hintEl.className='hint-msg';
+    card.append(msgEl, hintEl);
 
-    const send = document.createElement('button');
-    send.textContent = 'Skicka';
-    send.setAttribute('aria-label', `Skicka svar på gåta ${i+1}`);
-    send.addEventListener('click', ()=> checkAnswer(p, inputEl.value.trim().toLowerCase(), msgEl, hintEl, card, inputEl));
-    card.appendChild(send);
+    const send=document.createElement('button');
+    send.textContent='Skicka';
+    send.setAttribute('aria-label',`Skicka svar gåta ${i+1}`);
+    send.onclick=()=>checkAnswer(p,inputEl.value.trim().toLowerCase(),msgEl,hintEl,card,inputEl);
+    card.append(send);
 
-    app.appendChild(card);
+    app.append(card);
     inputEl?.focus();
   }
 
-  // --- Kontrollera svar för gåtor 1–4 ---
-  function checkAnswer(p, ans, msgEl, hintEl, card, inputEl) {
-    if (puzzleAudio) { puzzleAudio.pause(); puzzleAudio = null; }
+  // --- Check goes ---
+  function checkAnswer(p,ans,msgEl,hintEl,card,inputEl){
+    if(puzzleAudio){ puzzleAudio.pause(); puzzleAudio=null; }
     clearAnim(card);
-
-    if (p.type === 'prime') {
-      const mins = Math.floor((Date.now() - startTime) / 60000);
-      if (!isPrime(mins)) {
-        showError(msgEl, '⏳ Vänta till ett primtal-minut!');
-        return;
-      }
-      p.answer = String(mins);
+    if(p.type==='prime'){
+      const mins = Math.floor((Date.now()-startTime)/60000);
+      if(!isPrime(mins)){ showError(msgEl,'⏳ Vänta till primtal-minut!'); return; }
+      p.answer=String(mins);
     }
-
-    let correct = (ans === String(p.answer));
-    if (p.type === 'name') correct = validNames.includes(ans);
-
-    if (correct) {
-      play((p.type === 'name' || current+1 < puzzles.length) ? 'correct' : 'finish');
+    let ok = ans===String(p.answer);
+    if(p.type==='name') ok = validNames.includes(ans);
+    if(ok){
+      play((p.type==='name'||current+1<puzzles.length)?'correct':'finish');
       card.classList.add('correct');
       inputEl?.removeAttribute('aria-invalid');
-      setTimeout(()=> renderPuzzle(current+1), 500);
+      setTimeout(()=>renderPuzzle(current+1),500);
     } else {
       play('wrong');
       card.classList.add('shake');
-      showError(msgEl, '❌ Fel – försök igen!');
+      showError(msgEl,'❌ Fel – försök igen!');
       inputEl?.setAttribute('aria-invalid','true');
       failCount++;
-      if (failCount >= 2 && p.hint) hintEl.textContent = `Tips: ${p.hint}`;
+      if(failCount>=2 && p.hint) hintEl.textContent=`Tips: ${p.hint}`;
     }
   }
 
-  // --- Rendera slutfas (Gåta 5) ---
-  function renderFinal() {
+  // --- Final render ---
+  function renderFinal(){
     app.innerHTML = `
       <div class="card" id="final-form">
         <fieldset>
           <legend>Dokumentera trädet</legend>
           <label>1. Ta en gruppbild med trädet</label>
           <input type="file" id="photo" accept="image/*">
-          <img id="preview" alt="Förhandsgranskning av bild" style="display:none;">
+          <img id="preview" alt="Förhandsgranskning" style="display:none;">
           <label>2. Trädets latinska namn</label>
           <input type="text" id="latin" placeholder="Ex: Quercus robur">
           <label>3. Ditt lagnamn</label>
@@ -223,7 +209,8 @@
         <div class="field"><strong>Lagnamn:</strong> <span id="out-team"></span></div>
         <div class="field"><strong>Tid:</strong> <span id="out-time"></span></div>
         <div class="field"><strong>Bild:</strong><br><img id="out-image" alt="Gruppbild"></div>
-        <a id="sms-link" class="sms-btn">SMS:a färdigt meddelande</a>
+        <p style="margin-top:1rem;">📸 Ta en skärmdump av denna vy och skicka till domare</p>
+        <a id="sms-link" class="sms-btn">Öppna SMS</a>
       </div>`;
 
     const photo   = document.getElementById('photo');
@@ -239,51 +226,52 @@
     const smsLink = document.getElementById('sms-link');
 
     function validate() {
-      submit.disabled = !(photo.files.length===1 && latinI.value.trim()!=='' && teamI.value.trim()!=='');
+      submit.disabled = !(photo.files.length===1 
+        && latinI.value.trim()!=='' 
+        && teamI.value.trim()!=='');
     }
     [photo, latinI, teamI].forEach(el => el.addEventListener('input', validate));
 
     photo.addEventListener('change', () => {
       validate();
       const f = photo.files[0];
-      if (!f) return;
-      if (f.size > 5*1024*1024) {
-        alert('Filstorlek max 5 MB.');
-        photo.value = '';
-        preview.style.display = 'none';
-        validate();
+      if(!f) return;
+      if(f.size>5*1024*1024){
+        alert('Max 5 MB.');
+        photo.value=''; preview.style.display='none'; validate();
         return;
       }
-      const reader = new FileReader();
-      reader.onload = e => {
-        preview.src = e.target.result;
-        preview.style.display = 'block';
+      const r=new FileReader();
+      r.onload=e=>{
+        preview.src=e.target.result;
+        preview.style.display='block';
       };
-      reader.readAsDataURL(f);
+      r.readAsDataURL(f);
     });
 
-    submit.addEventListener('click', () => {
+    submit.addEventListener('click', ()=>{
       clearInterval(timerId);
-      const d = Date.now() - startTime;
-      const mm = String(Math.floor(d/60000)).padStart(2,'0');
-      const ss = String(Math.floor((d%60000)/1000)).padStart(2,'0');
-      outTime.textContent = `${mm}:${ss}`;
+      const d=Date.now()-startTime;
+      const mm=String(Math.floor(d/60000)).padStart(2,'0');
+      const ss=String(Math.floor((d%60000)/1000)).padStart(2,'0');
+      outTime.textContent=`${mm}:${ss}`;
       outLat.textContent  = latinI.value.trim();
       outTeam.textContent = teamI.value.trim();
 
-      const reader = new FileReader();
-      reader.onload = e => {
-        preview.src = e.target.result;
-        outImg.src  = e.target.result;
+      const reader=new FileReader();
+      reader.onload=e=>{
+        const dataURL=e.target.result;
+        preview.src=dataURL;
+        outImg.src=dataURL;
 
         const msg = `Hej! Träd: ${outLat.textContent}\r\nTid: ${outTime.textContent}\r\nLag: ${outTeam.textContent}`;
         smsLink.href = `sms:+46730736978?body=${encodeURIComponent(msg)}`;
-
-        document.getElementById('final-form').style.display = 'none';
-        summary.classList.add('visible');
-        play('finish');
       };
       reader.readAsDataURL(photo.files[0]);
+
+      document.getElementById('final-form').style.display='none';
+      summary.classList.add('visible');
+      play('finish');
     });
   }
 
