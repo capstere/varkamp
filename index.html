@@ -11,7 +11,7 @@
   <link rel="apple-touch-icon" href="icon-192.png">
   <!-- Valfri iOS-splash: -->
   <!-- <link rel="apple-touch-startup-image" href="splash.png"> -->
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=00001">
 </head>
 <body>
   <div class="wrapper">
@@ -26,15 +26,14 @@
         ⚠️ JavaScript krävs för att sidan ska fungera.
       </div>
     </noscript>
-  </div>
-
+  </div>  
   <!-- Ljudeffekter -->
   <audio id="audio-correct" src="assets/audio/correct.mp3" preload="auto"></audio>
   <audio id="audio-wrong"   src="assets/audio/wrong.mp3"   preload="auto"></audio>
   <audio id="audio-finish"  src="assets/audio/finish.mp3"  preload="auto"></audio>
 
   <!-- Huvudlogik -->
-  <script defer src="script.js"></script>
+<script defer src="script.js?v=00001"></script>
   <script>
     // Registrera Service Worker och visa uppdateringsbanner
     if ('serviceWorker' in navigator) {
