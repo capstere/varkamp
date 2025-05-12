@@ -3,81 +3,78 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>VÅRKAMP⁵ – Avslut</title>
+  <title>Gåta 5 – Slutkluring</title>
   <style>
-    body { font-family: sans-serif; background: #2d5f2e; color: #fff; margin:0; padding:20px; }
-    h1 { text-align:center; margin-bottom:0.5em; }
-    form, #summary { background: #3d7f3e; padding: 20px; border-radius: 8px; max-width:400px; margin: 0 auto; }
-    form input, form button, #summary div { width:100%; margin-bottom:12px; }
-    form input { padding:8px; border:none; border-radius:4px; background:#f0f8e0; color:#333; }
-    form button { padding:10px; border:none; border-radius:4px; background:#f4e842; font-weight:bold; cursor:pointer; }
-    #summary { display:none; text-align:left; }
+    body { margin:0; padding:20px; font-family:sans-serif; background:#2d5f2e; color:#fff; }
+    h1 { text-align:center; margin-bottom:1rem; }
+    .card { background:#3d7f3e; border-radius:8px; max-width:400px; margin:0 auto; padding:20px; }
+    .card input, .card button { width:100%; margin-bottom:12px; padding:8px; border:none; border-radius:4px; box-sizing:border-box; }
+    .card input { background:#f0f8e0; color:#333; }
+    .card button { background:#f4e842; font-weight:bold; cursor:pointer; }
+    #summary { display:none; text-align:center; }
     #summary img { max-width:100%; border:2px solid #fff; border-radius:4px; margin-bottom:12px; }
-    #send-info { font-size:0.9em; text-align:center; margin-top:1em; }
+    #summary p { margin:8px 0; }
+    #send-info { margin-top:1rem; font-size:0.9rem; }
   </style>
-  <!-- QR-bibliotek -->
-  <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
 </head>
 <body>
 
-  <h1>VÅRKAMP⁵ – Slutkluring</h1>
-
-  <!-- Formulär för att samla in info -->
-  <form id="game-form">
+  <h1>Gåta 5 – Slutkluring</h1>
+  <div class="card" id="form-card">
+    <p>Ta en gruppbild med trädet i bakgrunden och välj den här:</p>
+    <input type="file" id="photo" accept="image/*" required>
     <input type="text" id="latin" name="latin" placeholder="Trädets namn (latin)" required>
     <input type="text" id="team"  name="team"  placeholder="Lagnamn" required>
-    <input type="text" id="time"  name="time"  placeholder="Tid (mm:ss)" pattern="[0-9]{1,2}:[0-9]{2}" required>
-    <button type="submit">Visa sammanfattning</button>
-  </form>
+    <button id="submit">Skicka</button>
+  </div>
 
-  <!-- Sammanfattningsvy som deltagaren skärmdumpar -->
-  <div id="summary">
+  <div class="card" id="summary">
     <h1>🎉 Bra jobbat!</h1>
-    <div><strong>Träd (latin):</strong> <span id="sum-latin"></span></div>
-    <div><strong>Lagnamn:</strong> <span id="sum-team"></span></div>
-    <div><strong>Tid:</strong> <span id="sum-time"></span></div>
-    <div><strong>Slutlösenord:</strong> <span id="sum-secret"></span></div>
-    <div><strong>QR-kod:</strong></div>
-    <div id="qrcode"></div>
-    <div id="send-info">
+    <img id="sum-photo" src="" alt="Gruppbild">
+    <p><strong>Träd (latin):</strong> <span id="sum-latin"></span></p>
+    <p><strong>Lagnamn:</strong> <span id="sum-team"></span></p>
+    <p><strong>Tid:</strong> <span id="sum-time"></span></p>
+    <p id="send-info">
       Skärmdumpa den här vyn och skicka den via SMS till:<br>
       <strong>+46 730 736 978</strong>
-    </div>
+    </p>
   </div>
 
   <script>
-    const form = document.getElementById('game-form');
-    const summary = document.getElementById('summary');
+    // Mät starttid så fort sidan laddas
+    const startTs = Date.now();
 
-    // Generera ett enkelt “slutlösenord” – kan vara fast eller slumpas
-    const secretCode = 'KRAM' + Math.floor(Math.random()*900+100);
-
-    form.addEventListener('submit', e => {
+    document.getElementById('submit').addEventListener('click', e => {
       e.preventDefault();
-      // Hämta värden
-      const latin = document.getElementById('latin').value;
-      const team  = document.getElementById('team').value;
-      const time  = document.getElementById('time').value;
+      const photoInput = document.getElementById('photo');
+      const latinVal  = document.getElementById('latin').value.trim();
+      const teamVal   = document.getElementById('team').value.trim();
 
-      // Fyll i sammanfattningen
-      document.getElementById('sum-latin').textContent = latin;
-      document.getElementById('sum-team').textContent  = team;
-      document.getElementById('sum-time').textContent  = time;
-      document.getElementById('sum-secret').textContent= secretCode;
+      if (!photoInput.files.length || !latinVal || !teamVal) {
+        alert('Du måste välja en bild och fylla i både latin­namn och lagnamn!');
+        return;
+      }
 
-      // Generera QR med just lösenords-URL om du vill
-      const payloadUrl = window.location.origin + window.location.pathname +
-                         `?secret=${encodeURIComponent(secretCode)}`;
-      new QRCode(document.getElementById('qrcode'), {
-        text: payloadUrl,
-        width: 150,
-        height:150
-      });
+      // Beräkna tid (m:ss)
+      const elapsed = Date.now() - startTs;
+      const m = Math.floor(elapsed / 60000);
+      const s = Math.floor((elapsed % 60000) / 1000);
+      const timeStr = m + ':' + String(s).padStart(2, '0');
 
-      // Dölj formuläret, visa summary
-      form.style.display = 'none';
-      summary.style.display = 'block';
+      // Visa summary
+      const reader = new FileReader();
+      reader.onload = () => {
+        document.getElementById('sum-photo').src        = reader.result;
+        document.getElementById('sum-latin').textContent = latinVal;
+        document.getElementById('sum-team').textContent  = teamVal;
+        document.getElementById('sum-time').textContent  = timeStr;
+
+        document.getElementById('form-card').style.display = 'none';
+        document.getElementById('summary').style.display    = 'block';
+      };
+      reader.readAsDataURL(photoInput.files[0]);
     });
   </script>
+
 </body>
 </html>
