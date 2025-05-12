@@ -4,17 +4,17 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>VÅRKAMP⁵</title>
-
   <meta name="theme-color" content="#3b682d">
   <meta name="description" content="Ett interaktivt 5-delat utomhuspussel för lag med ljud, QR, stego och mystik.">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icon-192.png">
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="stylesheet" href="styles.css">
-
+  
   <!-- SHA256 -->
   <script src="https://cdn.jsdelivr.net/npm/js-sha256@0.9.0/build/sha256.min.js"></script>
-  <!-- QR‑generator -->
+  
+  <!-- QR-generator -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
@@ -22,12 +22,11 @@
     <header>
       <h1>VÅRKAMP<sup>5</sup></h1>
       <div id="timer" aria-live="polite">00:00</div>
+      <div id="progress" aria-live="polite" class="progress">Gåta 0 av 0</div>
     </header>
-
     <main id="app" role="main"></main>
-
     <noscript>
-      <div style="padding:1rem;background:#e3342f;color:white;text-align:center;border-radius:6px;margin-top:1rem;">
+      <div class="noscript-warning">
         ⚠️ JavaScript krävs för att sidan ska fungera.
       </div>
     </noscript>
@@ -38,16 +37,43 @@
   <audio id="audio-wrong"   src="assets/audio/wrong.mp3"   preload="auto"></audio>
   <audio id="audio-finish"  src="assets/audio/finish.mp3"  preload="auto"></audio>
 
-  <!-- JavaScript -->
+  <!-- Huvudlogik -->
   <script defer src="script.js"></script>
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('service-worker.js')
-          .then(reg => console.log('ServiceWorker OK', reg))
+          .then(reg => {
+            console.log('ServiceWorker registrerad', reg);
+            if (reg.waiting) promptUpdate(reg);
+            reg.addEventListener('updatefound', () => {
+              const inst = reg.installing;
+              inst.addEventListener('statechange', () => {
+                if (inst.state === 'installed' && navigator.serviceWorker.controller) {
+                  promptUpdate(reg);
+                }
+              });
+            });
+          })
           .catch(err => console.warn('ServiceWorker FAIL', err));
       });
     }
+
+    function promptUpdate(reg) {
+      const updateBanner = document.createElement('div');
+      updateBanner.className = 'update-banner';
+      updateBanner.innerHTML = `
+        <p>Ny version finns! <button id="reload">Uppdatera</button></p>
+      `;
+      document.body.appendChild(updateBanner);
+      document.getElementById('reload').onclick = () => {
+        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      };
+    }
+
+    navigator.serviceWorker?.addEventListener('controllerchange', () => {
+      window.location.reload();
+    });
   </script>
 </body>
 </html>
