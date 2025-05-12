@@ -1,10 +1,16 @@
 // --- KONFIGURATION av gåtorna ---
 const puzzles = [
-  { prompt: '1: Vigenère – avkryptera “ujvjs kfcej” med nyckeln PENTA', type: 'text', answer: 'kamp', hint: 'Det är ett slags chiffer. Nyckeln är viktig.' },
+  { prompt: '1: Vem i laget startar resan?', type: 'name', answer: '*', hint: 'Skriv ett deltagarnamn från listan' },
   { prompt: '2: Bakom mörkret finner du svaret', type: 'stego', answer: '17', img: 'assets/images/stego.png', hint: 'Prova klicka på bilden.' },
   { prompt: '3: Vilken sång hör du?', type: 'audio', answer: 'editpir', src: 'assets/audio/p3-chorus-rev.mp3', hint: 'Baklängesmusik, lyssna noga.' },
   { prompt: '4: Tajma svar med primtal', type: 'prime', answer: null, hint: 'Det är baserat på minuter som gått...' },
-  { prompt: '5: Skanna QR‑koden för svaret', type: 'qr', answer: 'kramp', data: 'kramp', hint: 'QR-koden innehåller ordet!' }
+  { prompt: '5: Skanna QR‑koden och följ instruktion', type: 'qr', answer: 'redo', data: 'Välj ett lämpligt träd. Ta en bild med hela laget + trädet. Skriv trädets namn på latin. Ange ert lagnamn. Skriv lösenordet. Ta en skärmdump och visa för domaren.', hint: 'När ni är redo, skriv "redo".' }
+];
+
+const validNames = [
+  "jana", "jens", "clare", "johannes", "jakob", "nille", "jonatan", "jennifer",
+  "ville", "simon", "matias", "liza", "samer", "christina", "oscar", "rebecca",
+  "philip", "hampus", "amelia", "malin", "joel"
 ];
 
 // --- GLOBALA VARIABLER ---
@@ -43,23 +49,16 @@ window.onload = () => {
   }
 };
 
+
 // --- TIMER-ÅTERSTÄLLNING ---
 function restoreTimer() {
   const saved = localStorage.getItem('varkamp_timer');
   const parsed = parseInt(saved);
-  if (!isNaN(parsed) && parsed > 0) {
-    startTime = parsed;
-  } else {
-    startTime = Date.now();
-    localStorage.setItem('varkamp_timer', startTime);
-  }
+  startTime = (!isNaN(parsed) && parsed > 0) ? parsed : Date.now();
+  localStorage.setItem('varkamp_timer', startTime);
 
   const savedPuzzle = parseInt(localStorage.getItem('varkamp_current'));
-  if (!isNaN(savedPuzzle) && savedPuzzle >= 0) {
-    current = savedPuzzle;
-  } else {
-    current = 0;
-  }
+  current = (!isNaN(savedPuzzle) && savedPuzzle >= 0) ? savedPuzzle : 0;
 
   timerId = setInterval(updateTimer, 500);
   renderPuzzle(current);
@@ -88,6 +87,8 @@ function updateTimer() {
   timer.textContent = `${m}:${s}`;
 }
 
+
+
 // --- RENDER PUZZLE ---
 function renderPuzzle(i) {
   localStorage.setItem('varkamp_current', i);
@@ -115,9 +116,14 @@ function renderPuzzle(i) {
   let inputEl, msgEl, hintEl;
 
   switch (p.type) {
+    case 'name':
+      inputEl = document.createElement('input');
+      inputEl.placeholder = 'Skriv ett deltagarnamn';
+      card.appendChild(inputEl);
+      break;
+
     case 'text':
       inputEl = document.createElement('input');
-      inputEl.type = 'text';
       inputEl.placeholder = 'Skriv svar';
       card.appendChild(inputEl);
       break;
@@ -151,7 +157,6 @@ function renderPuzzle(i) {
         rbtn.textContent = 'yalpeR';
       };
       card.appendChild(rbtn);
-
       inputEl = document.createElement('input');
       inputEl.placeholder = 'Svara här';
       card.appendChild(inputEl);
@@ -169,7 +174,7 @@ function renderPuzzle(i) {
       card.appendChild(qdiv);
       new QRCode(qdiv, { text: p.data, width: 150, height: 150 });
       inputEl = document.createElement('input');
-      inputEl.placeholder = 'Skriv ordet';
+      inputEl.placeholder = 'Skriv ordet när ni är redo';
       card.appendChild(inputEl);
       break;
   }
@@ -183,61 +188,12 @@ function renderPuzzle(i) {
   card.appendChild(hintEl);
 
   const btn = document.createElement('button');
-  btn.type = 'button';
   btn.textContent = 'Skicka';
   btn.onclick = () => checkAnswer(p, inputEl.value.trim().toLowerCase(), msgEl, hintEl);
   card.appendChild(btn);
 
-  if (i > 0 && !document.getElementById('restore-indicator')) {
-    const notice = document.createElement('div');
-    notice.id = 'restore-indicator';
-    notice.textContent = `🎯 Fortsätter där du slutade (Gåta ${i + 1})`;
-    notice.style.cssText = 'text-align:center;color:#fff;background:#444;padding:.5rem 1rem;margin-bottom:.75rem;border-radius:6px;animation:fadeout 3s forwards;';
-    app.prepend(notice);
-  }
-
   app.appendChild(card);
   if (inputEl) inputEl.focus();
-}
-
-// --- Spara poäng ---
-function saveCompletionStats() {
-  const ms = Date.now() - startTime;
-  const seconds = Math.floor(ms / 1000);
-  localStorage.setItem('varkamp_score', seconds);
-  localStorage.setItem('varkamp_finished', Date.now());
-}
-
-// --- FINISH ---
-function finish() {
-  localStorage.removeItem('varkamp_current');
-  clearInterval(timerId);
-  aFinish.currentTime = 0;
-  aFinish.play();
-  saveCompletionStats();
-
-  const card = document.createElement('div');
-  card.className = 'card';
-  card.innerHTML = `
-    <h2>🎉 Grattis! 🎉</h2>
-    <p class="prompt">Slutlösenordet är: <strong>KRAMP123</strong></p>`;
-
-  const shareBtn = document.createElement('button');
-  shareBtn.textContent = 'Dela framgång!';
-  shareBtn.onclick = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: 'VÅRKAMP⁵',
-        text: 'Jag klarade VÅRKAMP⁵! Slutlösenordet är KRAMP123.',
-        url: location.href
-      }).catch(err => console.warn('Delning avbröts', err));
-    } else {
-      alert('Web Share API stöds inte i din webbläsare.');
-    }
-  };
-  card.appendChild(shareBtn);
-  app.innerHTML = '';
-  app.appendChild(card);
 }
 
 // --- SVARKOLL ---
@@ -255,6 +211,19 @@ function checkAnswer(p, ans, msgEl, hintEl) {
   if (p.type === 'prime') {
     const m = Math.floor((Date.now() - startTime) / 60000);
     p.answer = isPrime(m) ? String(m) : null;
+  }
+
+  if (p.type === 'name') {
+    if (validNames.includes(ans)) {
+      aCorrect.currentTime = 0;
+      aCorrect.play();
+      renderPuzzle(current + 1);
+    } else {
+      aWrong.currentTime = 0;
+      aWrong.play();
+      msgEl.textContent = '❌ Fel – skriv ett korrekt namn.';
+    }
+    return;
   }
 
   if (ans === String(p.answer)) {
@@ -276,6 +245,48 @@ function checkAnswer(p, ans, msgEl, hintEl) {
       hintEl.textContent = `Tips: ${p.hint}`;
     }
   }
+}
+
+
+// --- FINISH ---
+function finish() {
+  localStorage.removeItem('varkamp_current');
+  clearInterval(timerId);
+  aFinish.currentTime = 0;
+  aFinish.play();
+  saveCompletionStats();
+
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `
+    <h2>✅ Klart!</h2>
+    <p class="prompt">Fyll i formuläret nedan och ta en skärmdump!</p>
+
+    <label>Trädets namn (latin):</label>
+    <input placeholder="Ex: Quercus robur">
+
+    <label>Lagnamn:</label>
+    <input placeholder="Ex: Tigerlaget">
+
+    <label>Slutlösenord:</label>
+    <input placeholder="Ex: KRAMP123">
+
+    <label>Ladda upp bild:</label>
+    <input type="file" accept="image/*">
+
+    <p style="margin-top:1rem;">📸 <strong>Ta en skärmdump och visa för domaren!</strong></p>
+  `;
+
+  app.innerHTML = '';
+  app.appendChild(card);
+}
+
+// --- Spara poäng ---
+function saveCompletionStats() {
+  const ms = Date.now() - startTime;
+  const seconds = Math.floor(ms / 1000);
+  localStorage.setItem('varkamp_score', seconds);
+  localStorage.setItem('varkamp_finished', Date.now());
 }
 
 // --- PRIMTALSHJÄLP ---
