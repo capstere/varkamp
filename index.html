@@ -3,78 +3,63 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Gåta 5 – Slutkluring</title>
-  <style>
-    body { margin:0; padding:20px; font-family:sans-serif; background:#2d5f2e; color:#fff; }
-    h1 { text-align:center; margin-bottom:1rem; }
-    .card { background:#3d7f3e; border-radius:8px; max-width:400px; margin:0 auto; padding:20px; }
-    .card input, .card button { width:100%; margin-bottom:12px; padding:8px; border:none; border-radius:4px; box-sizing:border-box; }
-    .card input { background:#f0f8e0; color:#333; }
-    .card button { background:#f4e842; font-weight:bold; cursor:pointer; }
-    #summary { display:none; text-align:center; }
-    #summary img { max-width:100%; border:2px solid #fff; border-radius:4px; margin-bottom:12px; }
-    #summary p { margin:8px 0; }
-    #send-info { margin-top:1rem; font-size:0.9rem; }
-  </style>
+  <title>VÅRKAMP⁵</title>
+  <meta name="theme-color" content="#3b682d">
+  <meta name="description" content="Ett interaktivt 5-delat utomhuspussel med ljud, stego, kryptologi och dokumentation.">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/js-sha256@0.9.0/build/sha256.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
-
-  <h1>Gåta 5 – Slutkluring</h1>
-  <div class="card" id="form-card">
-    <p>Ta en gruppbild med trädet i bakgrunden och välj den här:</p>
-    <input type="file" id="photo" accept="image/*" required>
-    <input type="text" id="latin" name="latin" placeholder="Trädets namn (latin)" required>
-    <input type="text" id="team"  name="team"  placeholder="Lagnamn" required>
-    <button id="submit">Skicka</button>
+  <div class="wrapper">
+    <header>
+      <h1>VÅRKAMP<sup>5</sup></h1>
+      <div id="timer" aria-live="polite">00:00</div>
+      <div id="progress" aria-live="polite">Gåta 0 av 0</div>
+    </header>
+    <main id="app" role="main"></main>
+    <noscript>
+      <div class="noscript-warning">
+        ⚠️ JavaScript krävs för att sidan ska fungera.
+      </div>
+    </noscript>
   </div>
 
-  <div class="card" id="summary">
-    <h1>🎉 Bra jobbat!</h1>
-    <img id="sum-photo" src="" alt="Gruppbild">
-    <p><strong>Träd (latin):</strong> <span id="sum-latin"></span></p>
-    <p><strong>Lagnamn:</strong> <span id="sum-team"></span></p>
-    <p><strong>Tid:</strong> <span id="sum-time"></span></p>
-    <p id="send-info">
-      Skärmdumpa den här vyn och skicka den via SMS till:<br>
-      <strong>+46 730 736 978</strong>
-    </p>
-  </div>
+  <!-- Ljudeffekter -->
+  <audio id="audio-correct" src="assets/audio/correct.mp3" preload="auto"></audio>
+  <audio id="audio-wrong"   src="assets/audio/wrong.mp3"   preload="auto"></audio>
+  <audio id="audio-finish"  src="assets/audio/finish.mp3"  preload="auto"></audio>
 
+  <script defer src="script.js"></script>
   <script>
-    // Mät starttid så fort sidan laddas
-    const startTs = Date.now();
-
-    document.getElementById('submit').addEventListener('click', e => {
-      e.preventDefault();
-      const photoInput = document.getElementById('photo');
-      const latinVal  = document.getElementById('latin').value.trim();
-      const teamVal   = document.getElementById('team').value.trim();
-
-      if (!photoInput.files.length || !latinVal || !teamVal) {
-        alert('Du måste välja en bild och fylla i både latin­namn och lagnamn!');
-        return;
-      }
-
-      // Beräkna tid (m:ss)
-      const elapsed = Date.now() - startTs;
-      const m = Math.floor(elapsed / 60000);
-      const s = Math.floor((elapsed % 60000) / 1000);
-      const timeStr = m + ':' + String(s).padStart(2, '0');
-
-      // Visa summary
-      const reader = new FileReader();
-      reader.onload = () => {
-        document.getElementById('sum-photo').src        = reader.result;
-        document.getElementById('sum-latin').textContent = latinVal;
-        document.getElementById('sum-team').textContent  = teamVal;
-        document.getElementById('sum-time').textContent  = timeStr;
-
-        document.getElementById('form-card').style.display = 'none';
-        document.getElementById('summary').style.display    = 'block';
-      };
-      reader.readAsDataURL(photoInput.files[0]);
-    });
+    // SW-registrering med uppdateringsbanner
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(reg => {
+            if (reg.waiting) showUpdate(reg);
+            reg.addEventListener('updatefound', () => {
+              const ins = reg.installing;
+              ins.addEventListener('statechange', () => {
+                if (ins.state === 'installed' && navigator.serviceWorker.controller) {
+                  showUpdate(reg);
+                }
+              });
+            });
+          });
+      });
+      navigator.serviceWorker.addEventListener('controllerchange', () => location.reload());
+    }
+    function showUpdate(reg) {
+      const b = document.createElement('div');
+      b.className = 'update-banner';
+      b.innerHTML = `Ny version finns! <button id="upd">Uppdatera</button>`;
+      document.body.appendChild(b);
+      b.querySelector('#upd').onclick = () => reg.waiting.postMessage({type:'SKIP_WAITING'});
+    }
   </script>
-
 </body>
 </html>
