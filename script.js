@@ -1,4 +1,3 @@
-```js
 // script.js
 (() => {
   'use strict';
@@ -20,9 +19,9 @@
 
   // --- LocalStorage-wrappers ---
   const storage = {
-    get(key)    { try { return localStorage.getItem(key); } catch { return null; } },
-    set(key,val){ try { localStorage.setItem(key,val); } catch {} },
-    del(key)    { try { localStorage.removeItem(key); } catch {} }
+    get(k)    { try { return localStorage.getItem(k); } catch { return null; } },
+    set(k,v)  { try { localStorage.setItem(k,v); } catch {} },
+    del(k)    { try { localStorage.removeItem(k); } catch {} }
   };
 
   // --- Global state ---
@@ -47,12 +46,10 @@
     for (let i = 2; i * i <= n; i++) if (n % i === 0) return false;
     return true;
   }
-  function vibrate(pattern) {
-    if (navigator.vibrate) navigator.vibrate(pattern);
-  }
+  function vibrate(p)    { navigator.vibrate?.(p); }
   function play(type) {
     const a = sounds[type];
-    if (a) { a.currentTime = 0; a.play().catch(() => {}); }
+    if (a) a.play().catch(()=>{});
     if (type === 'correct') vibrate(200);
     if (type === 'wrong')   vibrate([100,50,100]);
   }
@@ -61,17 +58,17 @@
 
   // --- Timer-uppdatering (i header) ---
   function updateTimer() {
-    const diff = Date.now() - startTime;
-    const mm = String(Math.floor(diff / 60000)).padStart(2,'0');
-    const ss = String(Math.floor((diff % 60000) / 1000)).padStart(2,'0');
+    const d = Date.now() - startTime;
+    const mm = String(Math.floor(d/60000)).padStart(2,'0');
+    const ss = String(Math.floor((d%60000)/1000)).padStart(2,'0');
     timerEl.textContent = `${mm}:${ss}`;
   }
 
   // --- Init ---
   function init() {
-    // Preload ljud och bild för stego
+    // Preload ljud och stegobild
     Object.values(sounds).forEach(a => a.load());
-    new Image().src = puzzles.find(p => p.type === 'stego').img;
+    new Image().src = puzzles.find(p => p.type==='stego').img;
 
     if (storage.get('varkamp_current')) resumeGame();
     else showIntro();
@@ -103,11 +100,10 @@
     document.getElementById('startBtn').addEventListener('click', resumeGame);
   }
 
-  // --- Rendera gåta ---
+  // --- Rendera gåta 1–4 + final ---
   function renderPuzzle(i) {
     storage.set('varkamp_current', i);
-    current = i;
-    failCount = 0;
+    current = i; failCount = 0;
     app.innerHTML = '';
     progEl.textContent = `Gåta ${i+1} av ${puzzles.length}`;
     if (!timerId) timerId = setInterval(updateTimer, 500);
@@ -122,44 +118,34 @@
     }
 
     // --- Gåtor 1–4 ---
-    const card = document.createElement('div');
-    card.className = 'card';
-    const prm = document.createElement('div');
-    prm.className = 'prompt';
-    prm.textContent = p.prompt;
+    const card = document.createElement('div'); card.className = 'card';
+    const prm  = document.createElement('div'); prm.className = 'prompt'; prm.textContent = p.prompt;
     card.appendChild(prm);
 
     let inputEl, msgEl, hintEl;
-
     switch (p.type) {
       case 'name':
       case 'prime':
-      case 'text':
         inputEl = document.createElement('input');
         inputEl.placeholder = 'Skriv svar';
         card.appendChild(inputEl);
         break;
-
       case 'stego':
         const img = document.createElement('img');
-        img.src = p.img;
-        img.alt = 'Stegobild';
-        img.style.filter = 'brightness(0)';
+        img.src = p.img; img.alt = 'Stegobild'; img.style.filter = 'brightness(0)';
         img.addEventListener('click', ()=> img.style.filter = '');
         card.appendChild(img);
         inputEl = document.createElement('input');
         inputEl.placeholder = 'Tal (siffror)';
         card.appendChild(inputEl);
         break;
-
       case 'audio':
-        puzzleAudio = new Audio(p.src);
-        puzzleAudio.preload = 'auto';
+        puzzleAudio = new Audio(p.src); puzzleAudio.preload = 'auto';
         const btn = document.createElement('button');
         btn.textContent = 'Spela baklänges';
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', ()=>{
           puzzleAudio.currentTime = 0;
-          puzzleAudio.play().catch(() => {});
+          puzzleAudio.play().catch(()=>{});
           btn.textContent = '...spelar';
         });
         card.appendChild(btn);
@@ -169,17 +155,14 @@
         break;
     }
 
-    msgEl = document.createElement('div');
-    msgEl.className = 'error-msg';
-    hintEl = document.createElement('div');
-    hintEl.className = 'hint-msg';
-    card.appendChild(msgEl);
-    card.appendChild(hintEl);
+    msgEl  = document.createElement('div'); msgEl.className = 'error-msg';
+    hintEl = document.createElement('div'); hintEl.className = 'hint-msg';
+    card.appendChild(msgEl); card.appendChild(hintEl);
 
     const send = document.createElement('button');
     send.textContent = 'Skicka';
     send.setAttribute('aria-label', `Skicka svar på gåta ${i+1}`);
-    send.addEventListener('click', () => checkAnswer(p, inputEl.value.trim().toLowerCase(), msgEl, hintEl, card, inputEl));
+    send.addEventListener('click', ()=> checkAnswer(p, inputEl.value.trim().toLowerCase(), msgEl, hintEl, card, inputEl));
     card.appendChild(send);
 
     app.appendChild(card);
@@ -204,15 +187,15 @@
     if (p.type === 'name') correct = validNames.includes(ans);
 
     if (correct) {
-      play((p.type === 'name' || current + 1 < puzzles.length) ? 'correct' : 'finish');
+      play((p.type === 'name' || current+1 < puzzles.length) ? 'correct' : 'finish');
       card.classList.add('correct');
       inputEl?.removeAttribute('aria-invalid');
-      setTimeout(() => renderPuzzle(current + 1), 500);
+      setTimeout(()=> renderPuzzle(current+1), 500);
     } else {
       play('wrong');
       card.classList.add('shake');
       showError(msgEl, '❌ Fel – försök igen!');
-      inputEl?.setAttribute('aria-invalid', 'true');
+      inputEl?.setAttribute('aria-invalid','true');
       failCount++;
       if (failCount >= 2 && p.hint) hintEl.textContent = `Tips: ${p.hint}`;
     }
@@ -255,22 +238,20 @@
     const outImg  = document.getElementById('out-image');
     const smsLink = document.getElementById('sms-link');
 
-    function validateFinal() {
-      submit.disabled = !(photo.files.length === 1 &&
-                         latinI.value.trim() !== '' &&
-                         teamI.value.trim() !== '');
+    function validate() {
+      submit.disabled = !(photo.files.length===1 && latinI.value.trim()!=='' && teamI.value.trim()!=='');
     }
-    [photo, latinI, teamI].forEach(el => el.addEventListener('input', validateFinal));
+    [photo, latinI, teamI].forEach(el => el.addEventListener('input', validate));
 
     photo.addEventListener('change', () => {
-      validateFinal();
-      const file = photo.files[0];
-      if (!file) return;
-      if (file.size > 5 * 1024 * 1024) {
+      validate();
+      const f = photo.files[0];
+      if (!f) return;
+      if (f.size > 5*1024*1024) {
         alert('Filstorlek max 5 MB.');
         photo.value = '';
         preview.style.display = 'none';
-        validateFinal();
+        validate();
         return;
       }
       const reader = new FileReader();
@@ -278,14 +259,14 @@
         preview.src = e.target.result;
         preview.style.display = 'block';
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(f);
     });
 
     submit.addEventListener('click', () => {
       clearInterval(timerId);
-      const elapsed = Date.now() - startTime;
-      const mm = String(Math.floor(elapsed / 60000)).padStart(2,'0');
-      const ss = String(Math.floor((elapsed % 60000) / 1000)).padStart(2,'0');
+      const d = Date.now() - startTime;
+      const mm = String(Math.floor(d/60000)).padStart(2,'0');
+      const ss = String(Math.floor((d%60000)/1000)).padStart(2,'0');
       outTime.textContent = `${mm}:${ss}`;
       outLat.textContent  = latinI.value.trim();
       outTeam.textContent = teamI.value.trim();
@@ -308,4 +289,3 @@
 
   document.addEventListener('DOMContentLoaded', init);
 })();
-```
